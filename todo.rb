@@ -152,7 +152,26 @@ post "/lists/:list_id/complete_all" do
   @list[:todos].each do |todo|
     todo[:completed] = "true"
   end
-  
+
   session[:success] = "All todos have been completed."
   redirect "/lists/#{@list_id}"
+end
+
+helpers do
+  def done_count(list)
+    tasks = list[:todos].size
+    count = list[:todos].count do |todo|
+      todo[:completed] == "true"
+    end
+    [count, tasks]
+  end
+
+  def done_count_string(list)
+    "#{done_count(list)[0]}/#{done_count(list)[1]}"
+  end
+
+  def all_done?(list)
+    results = done_count(list)
+    results[0] == results[1]
+  end
 end

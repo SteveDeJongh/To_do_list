@@ -3,7 +3,7 @@
     <li>
       <a href="/lists/<%= index %>">
         <h2><%= list[:name] %></h2>
-        <p><%= list[:todos].size %></p>
+        <p><%= done_count_string(list) %></p>
       </a>
     </li>
   <% end %>
