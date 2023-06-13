@@ -6,10 +6,12 @@ require "securerandom"
 
 configure do
   enable :sessions # Telling sinatra to activate it's session support.
-  set :session_secret, SecureRandom.hex(32) # setting the session to "secret"
+  set :session_secret, SecureRandom.hex(32)
+  # setting the session to a hex generate by the SecureRandom class.
 end
 
-helpers do # methods that are intended to be used in the view templates.
+helpers do
+  # methods that are intended to be used in the view templates.
   def list_complete?(list)
     todos_count(list) > 0 && todos_remaining_count(list) == 0
   end
@@ -26,7 +28,7 @@ helpers do # methods that are intended to be used in the view templates.
     list[:todos].select { |todo| !todo[:completed] }.size
   end
 
-  def sort_lists(lists, &block) # Refactored
+  def sort_lists(lists) # Refactored
     complete_lists, incomplete_lists = lists.partition { |list| list_complete?(list) }
 
     incomplete_lists.each { |list| yield list, lists.index(list) }
@@ -173,7 +175,7 @@ post "/lists/:list_id/todos" do
     session[:error] = error
     erb :list, layout: :layout
   else
-    @list[:todos] << {name: text, completed: false}
+    @list[:todos] << { name: text, completed: false }
     session[:success] = "The todo was added."
     redirect "/lists/#{@list_id}"
   end
