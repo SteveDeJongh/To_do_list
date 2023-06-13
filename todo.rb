@@ -2,10 +2,11 @@ require "sinatra"
 require "sinatra/reloader" if development?
 require "sinatra/content_for"
 require "tilt/erubis"
+require "securerandom"
 
 configure do
   enable :sessions # Telling sinatra to activate it's session support.
-  set :session_secret, 'secret' # setting the session to "secret"
+  set :session_secret, SecureRandom.hex(32) # setting the session to "secret"
 end
 
 helpers do # methods that are intended to be used in the view templates.
