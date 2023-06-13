@@ -1,5 +1,5 @@
 require "sinatra"
-require "sinatra/reloader"
+require "sinatra/reloader" if development?
 require "sinatra/content_for"
 require "tilt/erubis"
 
@@ -25,7 +25,7 @@ helpers do # methods that are intended to be used in the view templates.
     list[:todos].select { |todo| !todo[:completed] }.size
   end
 
-  def sort_lists(lists, &block)
+  def sort_lists(lists, &block) # Refactored
     complete_lists, incomplete_lists = lists.partition { |list| list_complete?(list) }
 
     incomplete_lists.each { |list| yield list, lists.index(list) }
