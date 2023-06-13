@@ -8,6 +8,24 @@ configure do
   set :session_secret, 'secret' # setting the session to "secret"
 end
 
+helpers do # methods that are intended to be used in the view templates.
+  def list_complete?(list)
+    todos_count(list) > 0 && todos_remaining_count(list) == 0
+  end
+
+  def list_class(list)
+    "complete" if list_complete?(list)
+  end
+
+  def todos_count(list)
+    list[:todos].size
+  end
+
+  def todos_remaining_count(list)
+    list[:todos].select { |todo| !todo[:completed] }.size
+  end
+end
+
 before do
   session[:lists] ||= []
 end
@@ -155,23 +173,4 @@ post "/lists/:list_id/complete_all" do
 
   session[:success] = "All todos have been completed."
   redirect "/lists/#{@list_id}"
-end
-
-helpers do
-  def done_count(list)
-    tasks = list[:todos].size
-    count = list[:todos].count do |todo|
-      todo[:completed] == "true"
-    end
-    [count, tasks]
-  end
-
-  def done_count_string(list)
-    "#{done_count(list)[0]}/#{done_count(list)[1]}"
-  end
-
-  def all_done?(list)
-    results = done_count(list)
-    results[0] == results[1]
-  end
 end
