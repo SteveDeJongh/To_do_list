@@ -24,6 +24,47 @@ helpers do # methods that are intended to be used in the view templates.
   def todos_remaining_count(list)
     list[:todos].select { |todo| !todo[:completed] }.size
   end
+
+  def sort_lists(lists, &block)
+    complete_lists, incomplete_lists = lists.partition { |list| list_complete?(list) }
+
+    incomplete_lists.each { |list| yield list, lists.index(list) }
+    complete_lists.each { |list| yield list, lists.index(list) }
+  end
+
+  # def sort_lists(list, &block) # full logic.
+  #   complete_lists = {}
+  #   incomplete_lists = {}
+
+  #   complete_lists, incomplete_lists = lists.partition { |list| list.complete?(list) }
+
+  #   list.each_with_index do |list, index|
+  #     if list_complete?(list)
+  #       complete_lists[list] = index
+  #     else
+  #       incomplete_lists[list] = index
+  #     end
+  #   end
+
+  #   incomplete_lists.each(&block)
+  #   complete_lists.each(&block)
+  # end
+
+  def sort_todos(todos, &block)
+    complete_todos = {}
+    incomplete_todos = {}
+
+    todos.each_with_index do |todo, index|
+      if todo[:completed]
+        complete_todos[todo] = index
+      else
+        incomplete_todos[todo] = index
+      end
+    end
+
+    incomplete_todos.each(&block)
+    complete_todos.each(&block)
+  end
 end
 
 before do
