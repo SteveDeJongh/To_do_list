@@ -115,6 +115,7 @@ def error_for_todo(name)
   end
 end
 
+# Return an error message if the list id does not exist. Return list id if id is valid.
 def load_list(index)
   list = session[:lists][index] if index && session[:lists][index]
   return list if list
