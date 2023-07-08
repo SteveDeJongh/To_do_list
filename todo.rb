@@ -15,7 +15,6 @@ configure do
 end
 
 helpers do
-  # Methods that are intended to be used in the view templates.
   def list_complete?(list)
     todos_count(list) > 0 && todos_remaining_count(list) == 0
   end
@@ -29,33 +28,15 @@ helpers do
   end
 
   def todos_remaining_count(list)
-    list[:todos].select { |todo| !todo[:completed] }.size
+    list[:todos].count { |todo| !todo[:completed] }
   end
 
-  def sort_lists(lists, &block) # Refactored
+  def sort_lists(lists, &block)
     complete_lists, incomplete_lists = lists.partition { |list| list_complete?(list) }
 
     incomplete_lists.each(&block)
     complete_lists.each(&block)
   end
-
-  # def sort_lists(list, &block) # full logic.
-  #   complete_lists = {}
-  #   incomplete_lists = {}
-
-  #   complete_lists, incomplete_lists = lists.partition { |list| list.complete?(list) }
-
-  #   list.each_with_index do |list, index|
-  #     if list_complete?(list)
-  #       complete_lists[list] = index
-  #     else
-  #       incomplete_lists[list] = index
-  #     end
-  #   end
-
-  #   incomplete_lists.each(&block)
-  #   complete_lists.each(&block)
-  # end
 
   def sort_todos(todos, &block)
     complete_todos, incomplete_todos = todos.partition { |todo| todo[:completed] }
@@ -65,32 +46,16 @@ helpers do
   end
 end
 
-before do
-  session[:lists] ||= []
-end
+def load_list(id)
+  list = session[:lists].find{ |list| list[:id] == id }
+  return list if list
 
-get "/" do
+  session[:error] = "The specified list was not found."
   redirect "/lists"
+  halt
 end
 
-# Resource based url paths:
-# GET  /lists        -> view all lists
-# GET  /lists/new    -> new list form
-# POST /lists        -> create new list
-# GET  /lists/1      -> View a single list
-
-# View all of the lists
-get "/lists" do
-  @lists = session[:lists]
-  erb :lists, layout: :layout
-end
-
-# Render the new list form
-get "/lists/new" do
-  erb :new_list, layout: :layout
-end
-
-# Return and error message if the name is invalid. Return nil if name is valid.
+# Return an error message if the name is invalid. Return nil if name is valid.
 def error_for_list_name(name)
   if !(1..100).cover? name.size
     "List name must be between 1 and 100 characters."
@@ -106,18 +71,28 @@ def error_for_todo(name)
   end
 end
 
-# Return an error message if the list id does not exist. Return list id if id is valid.
-def load_list(id)
-  list = session[:lists].find{ |list| list[:id] == id }
-  return list if list
+def next_element_id(elements)
+  max = elements.map { |todo| todo[:id] }.max || 0
+  max + 1
+end
 
-  session[:error] = "The specified list was not found."
+before do
+  session[:lists] ||= []
+end
+
+get "/" do
   redirect "/lists"
 end
 
-def next_element_id(elements)
-  max = elements.map { |element| element[:id]}.max || 0
-  max + 1
+# View list of lists
+get "/lists" do
+  @lists = session[:lists]
+  erb :lists, layout: :layout
+end
+
+# Render the new list form
+get "/lists/new" do
+  erb :new_list, layout: :layout
 end
 
 # Create a new list
@@ -136,12 +111,9 @@ post "/lists" do
   end
 end
 
-# View a todo list
+# View a single todo list
 get "/lists/:id" do
-  id = params[:id].to_i
-  @list = load_list(id)
-  @list_name  = @list[:name]
-  @list_id = @list[:id]
+  @list_id = params[:id].to_i
   @list = load_list(@list_id)
   erb :list, layout: :layout
 end
@@ -175,7 +147,6 @@ post "/lists/:id/destroy" do
   id = params[:id].to_i
   session[:lists].reject! { |list| list[:id] == id }
   session[:success] = "The list has been deleted."
-
   if env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
     "/lists"
   else
@@ -183,7 +154,7 @@ post "/lists/:id/destroy" do
   end
 end
 
-# Add a todo item to a todo list
+# Add a new todo to a list
 post "/lists/:list_id/todos" do
   @list_id = params[:list_id].to_i
   @list = load_list(@list_id)
@@ -202,14 +173,13 @@ post "/lists/:list_id/todos" do
   end
 end
 
-# Delete a todo item from a todo list
+# Delete a todo from a list
 post "/lists/:list_id/todos/:id/destroy" do
   @list_id = params[:list_id].to_i
   @list = load_list(@list_id)
 
   todo_id = params[:id].to_i
   @list[:todos].reject! { |todo| todo[:id] == todo_id }
-
   if env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
     status 204
   else
@@ -218,7 +188,7 @@ post "/lists/:list_id/todos/:id/destroy" do
   end
 end
 
-# Update the status of a todo item
+# Update the status of a todo
 post "/lists/:list_id/todos/:id" do
   @list_id = params[:list_id].to_i
   @list = load_list(@list_id)
@@ -232,13 +202,13 @@ post "/lists/:list_id/todos/:id" do
   redirect "/lists/#{@list_id}"
 end
 
-# Update the status of all todo items to complete
-post "/lists/:list_id/complete_all" do
-  @list_id = params[:list_id].to_i
+# Mark all todos as complete for a list
+post "/lists/:id/complete_all" do
+  @list_id = params[:id].to_i
   @list = load_list(@list_id)
 
   @list[:todos].each do |todo|
-    todo[:completed] = "true"
+    todo[:completed] = true
   end
 
   session[:success] = "All todos have been completed."
