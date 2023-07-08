@@ -15,7 +15,7 @@ configure do
 end
 
 helpers do
-  # methods that are intended to be used in the view templates.
+  # Methods that are intended to be used in the view templates.
   def list_complete?(list)
     todos_count(list) > 0 && todos_remaining_count(list) == 0
   end
