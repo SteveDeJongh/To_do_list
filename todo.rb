@@ -1,5 +1,4 @@
 require "sinatra"
-require "sinatra/reloader" if development?
 require "sinatra/content_for"
 require "tilt/erubis"
 require "securerandom"
@@ -13,6 +12,11 @@ configure do
   set :session_secret, SecureRandom.hex(32)
   # setting the session to a hex generate by the SecureRandom class.
   set :erb, :escape_html => true
+end
+
+configure(:development) do
+  require "sinatra/reloader" # if development? No longer necessary as in :development config block.
+  also_reload "database_persistence.rb"
 end
 
 helpers do
