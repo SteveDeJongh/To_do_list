@@ -6,7 +6,6 @@ require "securerandom"
 # require_relative "session_persistence"
 require_relative "database_persistence"
 
-
 configure do
   enable :sessions # Telling sinatra to activate it's session support.
   set :session_secret, SecureRandom.hex(32)
@@ -15,7 +14,8 @@ configure do
 end
 
 configure(:development) do
-  require "sinatra/reloader" # if development? No longer necessary as in :development config block.
+  require "sinatra/reloader" 
+  # if development? No longer necessary as in :development config block.
   also_reload "database_persistence.rb"
 end
 
