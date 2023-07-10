@@ -50,7 +50,7 @@ class DatabasePersistence
   def delete_list(id)
     query("DELETE FROM todos WHERE list_id = $1", id)
     # required to delete referencing todos due to foreight key constraint.
-    sql = "DROP FROM lists WHERE id = $1"
+    sql = "DELETE FROM lists WHERE id = $1"
     query(sql, id)
   end
 
