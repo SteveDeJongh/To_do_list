@@ -63,8 +63,7 @@ class DatabasePersistence
     query("DELETE FROM todos WHERE list_id = $1", id)
     # required to delete referencing todos due to foreight key constraint.
     # If we added "ON DELETE CASCADE" clause this would not be required.
-    sql = "DELETE FROM lists WHERE id = $1"
-    query(sql, id)
+    query("DELETE FROM lists WHERE id = $1", id)
   end
 
   def update_list_name(id, new_name)
@@ -80,7 +79,7 @@ class DatabasePersistence
   def delete_todo_from_list(list_id, todo_id)
     sql = "DELETE FROM todos WHERE id = $1 AND list_id = $2"
     query(sql, todo_id, list_id)
-    # While no required to use both todo_id and list_id to delete a todo, it's a good idea
+    # While not required to use both todo_id and list_id to delete a todo, it's a good idea
     # to be as specific as possible when performing destructive operations.
   end
 

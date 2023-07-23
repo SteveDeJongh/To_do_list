@@ -23,21 +23,21 @@ helpers do
   def list_complete?(list)
     list[:todos_count] > 0 && list[:todos_remaining_count] == 0
   end
-
+  
   def list_class(list)
     "complete" if list_complete?(list)
   end
-
+  
   def sort_lists(lists, &block)
     complete_lists, incomplete_lists = lists.partition { |list| list_complete?(list) }
-
+  
     incomplete_lists.each(&block)
     complete_lists.each(&block)
   end
-
+  
   def sort_todos(todos, &block)
     complete_todos, incomplete_todos = todos.partition { |todo| todo[:completed] }
-
+  
     incomplete_todos.each(&block)
     complete_todos.each(&block)
   end
