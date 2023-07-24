@@ -25,3 +25,8 @@
     <a href="/lists/<%= params[:id] %>">Cancel</a>
   </fieldset>
 </form>
+
+<% content_for :header_links do %>
+  <a class="add" href="/lists/new">New List</a>
+  <a class="list" href="/lists">All Lists</a>
+<% end %>
